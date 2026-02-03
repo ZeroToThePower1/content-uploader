@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes & Mocks</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .heading {
+            text-align: center;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            margin: 20px;
+        }
+
+        .box {
+            flex: 1;
+            border: 1px solid black;
+            padding: 10px;
+            height: 70vh;
+            overflow-y: auto;
+        }
+
+        .upload-section {
+            margin: 20px;
+        }
+
+        .upload-section input {
+            margin: 5px;
+            padding: 5px;
+        }
+
+        .upload-section button {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .strip {
+            margin: 15px;
+            border: 1px solid black;
+            padding: 10px;
+        }
+
+        .strip p,
+        .strip a {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Upload Section -->
+    <div class="upload-section">
+        <h2>Upload Notes</h2>
+        <input type="text" id="note_url" placeholder="Paste note URL">
+        <input type="text" id="note_title" placeholder="Enter title">
+        <button id="upload_note_btn">Upload Note</button>
+
+        <h2>Upload Mocks</h2>
+        <input type="text" id="mock_url" placeholder="Paste mock URL">
+        <input type="text" id="mock_title" placeholder="Enter title">
+        <button id="upload_mock_btn">Upload Mock</button>
+    </div>
+
+    <!-- Display Section -->
+    <div class="container">
+        <div class="box">
+            <h2 class="heading">Notes</h2>
+            <div id="noteList"></div>
+        </div>
+
+        <div class="box">
+            <h2 class="heading">Mocks</h2>
+            <div id="mockList"></div>
+        </div>
+    </div>
+
+    <script>
+        const baseURL = 'http://localhost:3000'
+
+        const noteList = document.getElementById('noteList')
+        const mockList = document.getElementById('mockList')
+
+        const noteUrlInput = document.getElementById('note_url')
+        const noteTitleInput = document.getElementById('note_title')
+        const uploadNoteBtn = document.getElementById('upload_note_btn')
+
+        const mockUrlInput = document.getElementById('mock_url')
+        const mockTitleInput = document.getElementById('mock_title')
+        const uploadMockBtn = document.getElementById('upload_mock_btn')
+
+        // ---------------- FETCH FUNCTIONS ----------------
+
+        async function fetchNotes() {
+            noteList.innerHTML = ""
+            try {
+                const response = await fetch(`${baseURL}/notes/urls`)
+                const data = await response.json()
+
+                data.forEach(item => {
+                    createStrip(item, noteList)
+                })
+            } catch (error) {
+                console.error(error)
+            }
+        }
+
+        async function fetchMocks() {
+            mockList.innerHTML = ""
+            try {
+                const response = await fetch(`${baseURL}/mocks/urls`)
+                const data = await response.json()
+
+                data.forEach(item => {
+                    createStrip(item, mockList)
+                })
+            } catch (error) {
+                console.error(error)
+            }
+        }
+
+        function createStrip(item, parent) {
+            const strip = document.createElement('div')
+            strip.className = 'strip'
+
+            const title = document.createElement('p')
+            title.innerText = item.title
+
+            const link = document.createElement('a')
+            link.href = item.url
+            link.innerText = item.url
+            link.target = "_blank"
+
+            strip.appendChild(title)
+            strip.appendChild(link)
+            parent.appendChild(strip)
+        }
+
+        // ---------------- UPLOAD EVENTS ----------------
+
+        uploadNoteBtn.addEventListener('click', async () => {
+            if (!noteUrlInput.value || !noteTitleInput.value) {
+                alert("Please fill all fields")
+                return
+            }
+
+            try {
+                await fetch(`${baseURL}/notes`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: noteTitleInput.value,
+                        url: noteUrlInput.value
+                    })
+                })
+
+                noteUrlInput.value = ""
+                noteTitleInput.value = ""
+                fetchNotes()
+
+            } catch (error) {
+                console.error(error)
+            }
+        })
+
+        uploadMockBtn.addEventListener('click', async () => {
+            if (!mockUrlInput.value || !mockTitleInput.value) {
+                alert("Please fill all fields")
+                return
+            }
+
+            try {
+                await fetch(`${baseURL}/mocks`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: mockTitleInput.value,
+                        url: mockUrlInput.value
+                    })
+                })
+
+                mockUrlInput.value = ""
+                mockTitleInput.value = ""
+                fetchMocks()
+
+            } catch (error) {
+                console.error(error)
+            }
+        })
+
+        // Initial Load
+        fetchNotes()
+        fetchMocks()
+
+    </script>
+
+</body>
+
+</html>

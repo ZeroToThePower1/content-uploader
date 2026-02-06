@@ -175,7 +175,7 @@
 
             const delbtn = document.createElement('button')
             delbtn.innerText = 'delete'
-            delbtn.addEventListener('click', deletenote(item.url,keyword))
+            delbtn.addEventListener('click', ()=>deletenote(item.url,keyword))
             link.href = item.url
             link.innerText = item.url
             link.target = "_blank"

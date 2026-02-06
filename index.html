@@ -99,6 +99,42 @@
         const uploadMockBtn = document.getElementById('upload_mock_btn')
 
         // ---------------- FETCH FUNCTIONS ----------------
+        async function deletenote(url, keyWord) {
+    try {
+        // 1. ENCODE THE URL - CRITICAL!
+        const encodedUrl = encodeURIComponent(url);
+        
+        const response = await fetch(`${baseURL}/${keyWord}/${encodedUrl}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json' // FIXED: hyphen to slash
+            }
+        });
+        
+        if (!response.ok) {
+            const receivedError = await response.json();
+            throw new Error(receivedError.message || 'Failed to delete');
+        }
+        
+        // 2. HANDLE SUCCESS RESPONSE
+        const result = await response.json();
+        return {
+            success: true,
+            data: result,
+            message: 'Successfully deleted'
+        };
+        
+    } catch (error) {
+        console.error('Delete error:', error);
+        
+        // 3. RETURN ERROR OBJECT FOR CALLER TO HANDLE
+        return {
+            success: false,
+            error: error.message,
+            message: 'Delete failed'
+        };
+    }
+}
 
         async function fetchNotes() {
             noteList.innerHTML = ""
